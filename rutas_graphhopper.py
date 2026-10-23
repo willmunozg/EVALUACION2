@@ -3,11 +3,11 @@ import urllib.parse
 
 geocode_url = "http://localhost:8082/api/1/geocode?"
 route_url = "http://localhost:8082/api/1/route?"
-key = "paste-your-key-here"      # Replace with your GraphHopper key (column TU_KEY_GRAPHHOPPER)
+key = "01f0b30a-60bb-4430-9784-485b15a8141e"      # Replace with your GraphHopper key (column TU_KEY_GRAPHHOPPER)
 
 def geocoding (location, key):
     while location == "":
-        location = input("Enter the location again: ")
+        location = input("Introduce la ubicación de nuevo: ")
     geocode_url = "http://localhost:8082/api/1/geocode?"
     url = geocode_url + urllib.parse.urlencode({"q":location, "limit": "1", "key":key})
 
@@ -38,26 +38,26 @@ def geocoding (location, key):
         else:
             new_loc = name
 
-        print("Geocoding API URL for " + new_loc + " (Location Type: " + value + ")\n" + url)
+        print("URL de la API de geocodificación para " + new_loc + " (Tipo de ubicación " + value + ")\n" + url)
     else:
         lat="null"
         lng="null"
         new_loc=location
         if json_status == 200:
             json_status = 404
-            print("Location not found: " + location)
+            print("Ubicación no encontrada: " + location)
         else:
-            print("Geocoding API status: " + str(json_status) + "\nError message: " + json_data["message"])
+            print("Estado de la API de geocodificación: " + str(json_status) + "\nError message: " + json_data["message"])
     return json_status,lat,lng,new_loc
 
 while True:
-    loc1 = input("Starting Location: ")
-    if loc1 == "quit" or loc1 == "q":
+    loc1 = input("Ubicación de inicio: ")
+    if loc1 == "salir" or loc1 == "s":
         break
     orig = geocoding(loc1, key)
 
     loc2 = input("Destination: ")
-    if loc2 == "quit" or loc2 == "q":
+    if loc2 == "salir" or loc2 == "s":
         break
     dest = geocoding(loc2, key)
 
@@ -68,10 +68,10 @@ while True:
         paths_url = route_url + urllib.parse.urlencode({"key":key}) + op + dp
         paths_status = requests.get(paths_url).status_code
         paths_data = requests.get(paths_url).json()
-        print("Routing API Status: " + str(paths_status) + "\nRouting API URL:\n" + paths_url)
+        print("Estado de la API de enrutamiento: " + str(paths_status) + "\nRouting API URL:\n" + paths_url)
 
         print("=================================================")
-        print("Directions from " + orig[3] + " to " + dest[3])
+        print("Indicaciones desde " + orig[3] + " to " + dest[3])
         print("=================================================")
         if paths_status == 200:
             km = (paths_data["paths"][0]["distance"])/1000
@@ -79,14 +79,14 @@ while True:
             sec = int(paths_data["paths"][0]["time"]/1000%60)
             min = int(paths_data["paths"][0]["time"]/1000/60%60)
             hr = int(paths_data["paths"][0]["time"]/1000/60/60)
-            print("Distance Traveled: {0:.1f} km / {1:.1f} m".format(km, meters))
-            print("Trip Duration: {0:02d}:{1:02d}:{2:02d}".format(hr, min, sec))
+            print("Distancia recorrida: {0:.2f} km / {1:.2f} m".format(km, meters))
+            print("Duración del viaje: {0:02d}:{1:02d}:{2:02d}".format(hr, min, sec))
             print("=================================================")
             for each in range(len(paths_data["paths"][0]["instructions"])):
                 path = paths_data["paths"][0]["instructions"][each]["text"]
                 distance = paths_data["paths"][0]["instructions"][each]["distance"]
-                print("{0} ( {1:.1f} km / {2:.1f} m )".format(path, distance/1000, distance))
+                print("{0} ( {1:.2f} km / {2:.2f} m )".format(path, distance/1000, distance))
             print("=============================================")
         else:
-            print("Error message: " + paths_data["message"])
+            print("Mensaje de error: " + paths_data["message"])
             print("*************************************************")
